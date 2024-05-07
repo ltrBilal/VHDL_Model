@@ -10,6 +10,4 @@ s3 = Signal.__new__(Signal)
 s3.__init__("res", "unsigned(8 downto 0)", "out")
 
 add = Adder.__new__(Adder)
-add.__init__(s1, s2, s3)
-
-add.generate_vhdl_code()
+add.__init__("add_tb", s1, s2, s3)

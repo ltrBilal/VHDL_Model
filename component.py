@@ -1,8 +1,21 @@
 from a_signal import Signal
-from typing import List
+from abc import ABC, abstractmethod
 
 class Component:
-    signaux : List[Signal] = []
+    name : None
+    port : None
+    
+    def __init__(self, name) -> None:
+        self.name = name
+    
+    @abstractmethod
+    def add_component(self, name):
+        pass
 
-    for signal in signaux:
+    @abstractmethod
+    def generate_vhdl_code(self):
+        pass
+
+    @abstractmethod
+    def generate_component_code(self, name):
         pass
