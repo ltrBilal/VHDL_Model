@@ -1,7 +1,4 @@
 class Signal:
-    name = None
-    type = None
-    direction = None
     bits = 8
 
     def __init__(self, name, type, direction) -> None:
@@ -17,11 +14,10 @@ class Signal:
 
 #-------------------------------------------------------------
 
-class Clk(Signal):
+class Clock(Signal):
     period = "10 us"
     type = "std_logic"
     direction = "in"
-    bits = 8
 
     def __init__(self, name) -> None:
         self.name = name

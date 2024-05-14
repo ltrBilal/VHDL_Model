@@ -1,86 +1,82 @@
 from a_signal import *
 from library import *
 from component import *
+from typing import List
 
 class Adder(Component):
-    In_1 = Signal.__new__(Signal)
-    In_2 = Signal.__new__(Signal)
-    Out = Signal.__new__(Signal)
-    components : list[Component]
 
-    launch = True
+    launch = True # to write a file for this component type, just once
 
-    def __init__(self, name, in_signal_1, in_signal_2, out_signal) -> None:
-        super().__init__(name)
-        self.In_1 = in_signal_1
-        self.In_2 = in_signal_2
-        self.Out = out_signal
+    def __init__(self, clock_name : str, component_name : str, first_input_signal : Signal, 
+                 second_input_signal : Signal, output_signal : Signal) -> None:
+        super().__init__(component_name)
 
-        # clock
-        clk = Clk.__new__(Clk)
-        clk.__init__("clk")
+        self.first_In = first_input_signal
+        self.second_In = second_input_signal
+        self.output = output_signal
+        self.racine = "adder"
+
+        # list of signals
+        self.signals_list : List[Signal] = []
+        self.signals_list.extend([self.first_In, self.second_In, self.output])
+
+        # clock 
+        clk = Clock.__new__(Clock)
+        clk.__init__(clock_name)
+        self.signals_list.insert(0, clk)
+
         # port
-        self.port = f"          {clk.signal_to_vhdl()};\n"
-        self.port += f"          {self.In_1.signal_to_vhdl()};\n"
-        self.port += f"          {self.In_2.signal_to_vhdl()};\n"
-        self.port += f"          {self.Out.signal_to_vhdl()}\n"
-        # pour generer le code VHDL une seule fois
-        adder = Adder.__new__(Adder)
-        if adder.launch == True:
-            Adder.launch = False
-            Adder.generate_vhdl_code(self)
-            print("Adder VHDL code generated !!")
-
-    # -------------------------------------------------------------------
-    def generate_component_code(port, name):
-        code = ""
-        code += f"   component {name} is\n"
-        code += f"      {port}\n"
-        code += "   end component;\n"
-        return code
+        self._Component__generate_ports(self.signals_list)
     
     # -------------------------------------------------------------------
-    def add_component(self, name):
-        comp = self.generate_component_code(self.port, name)
-        self.components.append(comp)
-
-    # -------------------------------------------------------------------
     
-    def generate_vhdl_code(self):
+    def generate_component_file(self):
         
-        if self.In_1.bits >= self.In_2.bits:
-            self.Out.bits = self.In_1.bits + 1
+        if self.first_In.bits >= self.second_In.bits:
+            self.output.bits = self.first_In.bits + 1
         else:
-            self.Out.bits = self.In_2.bits + 1
+            self.output.bits = self.second_In.bits + 1
 
         # library
         lib = Library.__new__(Library)
 
         # entity
-        entity = "  \nentity adder is\n"
-        entity += "     port \n     (\n"
+        entity = f"  \nentity {self.racine} is\n"
         entity += self.port
-        entity += "     );\nend adder;\n"
+        entity += f"end {self.racine};\n"
 
         # architecture
         arch = "\narchitecture adder_arch of adder is\n"
         arch += "begin\n"
-        arch += f"      {self.Out.name} <= ('0' & {self.In_1.name}) + ('0' & {self.In_2.name});\n"
+        arch += f"      {self.output.name} <= ('0' & {self.first_In.name}) + ('0' & {self.second_In.name});\n"
         arch += "end adder_arch;"
 
-        code += lib.library_vhdl()
+        code = lib.library_vhdl()
         code += entity
         code += arch
 
-        file1 = open('./adder.vhd', 'w')
+        file1 = open(f'./{self.racine}.vhd', 'w')
         file1.write(code)
 
-        # component entity
-        comp_entity = f"\nentity adder_tb is \n\n end adder_tb;\n"
+    # -------------------------------------------------------------------
+    
+    def generate_component_body(self):
+        if Adder.first_component == True:
+            Adder.first_component = False
+            code = ""
+            code += f"   component {self.racine} is\n"
+            code += f"{self.port}\n"
+            code += "   end component;\n"
 
-        # component architecture
-        comp_arch = "\narchitecture adder_tb_arch of adder is\n"
-        for i in self.components:
-            comp_arch += (f"{i}\n")
+            for i in self.signals_list:
+                code += f"  signal {i.name} : {i.type};\n"
+            return code
         
+    # -------------------------------------------------------------------
         
+    def component_to_vhdl(self):
+        # create VHDL file for this components
+        if Adder.launch == True:
+            self.generate_component_file()
+            Adder.launch = False
+        return self._Component__generate_component_map()
