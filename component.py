@@ -1,32 +1,29 @@
 from a_signal import Signal
 from typing import List
 from abc import ABC, abstractmethod
+from port import Port
+from connector import Connector
 
 class Component(ABC):
     
     def __init__(self, component_name : str) -> None:
         self.component_name = component_name
-        self.port = None
-        self.racine = None
+        self.port : Port = None
+        self.racine : str = None
+        self.connector : Connector = None
 
     def __generate_ports(self, signals_list : List[Signal]):
-        self.port = "   port(\n"
-        for i in signals_list:
-            if signals_list[-1] == i:
-                self.port += f"          {i.signal_to_vhdl()}\n"
-            else:
-                self.port += f"          {i.signal_to_vhdl()};\n"
-        self.port += "   );\n"
+        self.port = Port(signals_list)
 
     def __generate_component_map(self):
-        map = f"-- instanciation for {self.racine}\n"
+        map = f"-- instantiate an {self.racine}\n"
         map += f"   {self.component_name}: entity work.{self.racine}({self.racine}_arch)\n"
         map += "    port map(\n"
-        for i in self.signals_list:
+        for i, j in zip(self.signals_list, self.connector.signals_list):
             if self.signals_list[-1] == i:
-                map += f"       {i.name} => {i.name}\n"
+                map += f"       {i.name} => {j.name}\n"
             else:
-                map += f"       {i.name} => {i.name},\n"
+                map += f"       {i.name} => {j.name},\n"
         map += "    );\n"
         return map
     
@@ -38,5 +35,5 @@ class Component(ABC):
         pass
 
     @abstractmethod
-    def generate_component_body(self, name):
+    def component_to_vhdl(self):
         pass

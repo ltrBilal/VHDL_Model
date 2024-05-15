@@ -7,7 +7,7 @@ class Adder(Component):
 
     launch = True # to write a file for this component type, just once
 
-    def __init__(self, clock_name : str, component_name : str, first_input_signal : Signal, 
+    def __init__(self, clock : Clock, component_name : str, first_input_signal : Signal, 
                  second_input_signal : Signal, output_signal : Signal) -> None:
         super().__init__(component_name)
 
@@ -18,12 +18,7 @@ class Adder(Component):
 
         # list of signals
         self.signals_list : List[Signal] = []
-        self.signals_list.extend([self.first_In, self.second_In, self.output])
-
-        # clock 
-        clk = Clock.__new__(Clock)
-        clk.__init__(clock_name)
-        self.signals_list.insert(0, clk)
+        self.signals_list.extend([clock, self.first_In, self.second_In, self.output])
 
         # port
         self._Component__generate_ports(self.signals_list)
@@ -42,7 +37,7 @@ class Adder(Component):
 
         # entity
         entity = f"  \nentity {self.racine} is\n"
-        entity += self.port
+        entity += self.port.port_to_vhdl()
         entity += f"end {self.racine};\n"
 
         # architecture
@@ -57,20 +52,6 @@ class Adder(Component):
 
         file1 = open(f'./{self.racine}.vhd', 'w')
         file1.write(code)
-
-    # -------------------------------------------------------------------
-    
-    def generate_component_body(self):
-        if Adder.first_component == True:
-            Adder.first_component = False
-            code = ""
-            code += f"   component {self.racine} is\n"
-            code += f"{self.port}\n"
-            code += "   end component;\n"
-
-            for i in self.signals_list:
-                code += f"  signal {i.name} : {i.type};\n"
-            return code
         
     # -------------------------------------------------------------------
         

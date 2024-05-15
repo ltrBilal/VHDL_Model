@@ -1,7 +1,7 @@
 class Signal:
     bits = 8
 
-    def __init__(self, name, type, direction) -> None:
+    def __init__(self, name : str, type : str, direction : str) -> None:
         self.name = name
         self.type = type
         self.direction = direction
@@ -12,6 +12,9 @@ class Signal:
         else:
             return f"{self.name} : {self.direction} {self.type}"
 
+    def copy(self):
+        return Signal(self.name, self.type, self.direction)
+
 #-------------------------------------------------------------
 
 class Clock(Signal):
@@ -19,5 +22,5 @@ class Clock(Signal):
     type = "std_logic"
     direction = "in"
 
-    def __init__(self, name) -> None:
+    def __init__(self, name : str) -> None:
         self.name = name
