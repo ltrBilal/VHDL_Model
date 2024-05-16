@@ -19,17 +19,9 @@ begin
    first_adder: entity work.adder(adder_arch)
     port map(
        clk => clk,
-       a => a,
+       a => k_int,
        b => b,
        res => res
     );
 
--- instantiate an adder
-   second_adder: entity work.adder(adder_arch)
-    port map(
-       clk => clk,
-       a => a,
-       b => b,
-       res => res
-    );
 end test_arch;

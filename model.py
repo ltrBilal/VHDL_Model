@@ -2,14 +2,13 @@ from library import Library
 from typing import List
 from component import *
 from a_signal import *
-from connector import *
 
 class Model:
     
     components_list : List[Component] = []
     signals_list : List[Signal] = []
     connections_list : List[Connector] = []
-    process_list = []
+    #process_list = []
 
     def __init__(self, name : str) -> None:
         self.name = name
@@ -46,8 +45,13 @@ class Model:
     # -------------------------------------------------------------------
 
     def model_to_vhdl(self):
-        # add connector
-        self.__connect()
+        self.__add_necessary_signals()
+        # link components and connectors
+        for i in self.connections_list:
+            for j in self.components_list:
+                if i.component.component_name == j.component_name:
+                    j.connector = i
+                    break
         # add libraries
         lib = self.lib.library_vhdl()
         # entity
@@ -79,8 +83,12 @@ class Model:
         file = open(f"./{self.name}.vhd", 'w')
         file.write(code)
         
-
-    def __connect(self):
+    # -------------------------------------------------------------------
+    """
+        this function adds signals 
+        passed in the connector if they are not in the ports session
+    """
+    def __add_necessary_signals(self):
         for i in self.connections_list:
             for j in i.signals_list:
                 if j not in self.signals_list and j not in self.ports.signals_list:

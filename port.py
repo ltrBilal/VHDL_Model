@@ -7,7 +7,7 @@ class Port:
         self.signals_list = signals_list
 
     
-    def port_to_vhdl(self):
+    def port_to_vhdl(self) -> str:
         port = "   port(\n"
         for i in self.signals_list:
             if self.signals_list[-1] == i:
