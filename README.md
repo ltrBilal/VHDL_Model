@@ -1,1 +1,1 @@
-# Counter_VHDL_Model
+# VHDL_Model
