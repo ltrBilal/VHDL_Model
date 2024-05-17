@@ -2,31 +2,34 @@ from library import Library
 from typing import List
 from component import *
 from a_signal import *
+from process import *
+from typing import Type
 
 class Model:
     
     components_list : List[Component] = []
     signals_list : List[Signal] = []
     connections_list : List[Connector] = []
-    #process_list = []
+    process_list : List[Type[Process]] = []
 
     def __init__(self, name : str) -> None:
         self.name = name
         self.lib = Library.__new__(Library)
         self.ports = None
+        self.process_list : List[Type[Process]] = None
 
     # -------------------------------------------------------------------
 
     def add_component(self, component : Component):
         if component in self.components_list:
-            print(f"ERROR : component name \"{component.component_name}\" already existe")
+            print(f"ERROR : component name \"{component.component_name}\" already exist")
         else:
             self.components_list.append(component)
             print(f"the component {component.component_name} is added")
 
     def add_signal(self, signal : Signal):
         if signal in self.signals_list:
-            print(f"ERROR : signal name \"{signal.name}\" already existe")
+            print(f"ERROR : signal name \"{signal.name}\" already exist")
         else:
             self.signals_list.append(signal)
             print(f"the signal {signal.name} is added")
@@ -39,6 +42,12 @@ class Model:
             connector.component.connector = connector
             print(f"the connector for {connector.component.component_name} is added")
 
+    def add_process(self, process : Type[Process]):
+        if process in self.process_list:
+            print(f"ERROR: process {process.label} already exist")
+        else:
+            self.process_list.append(process)
+            
     def add_port(self, ports : Port):
         self.ports = ports
 
@@ -67,13 +76,24 @@ class Model:
         for i in signals_list_copy:
             i.direction = None
             arch += f"      {i.signal_to_vhdl()}; \n"
+        for i in self.process_list:
+            if type(i) == Clock_Process and i.clock in self.signals_list:
+                print("ERROR : this clock can't be used in clock simulation")
+                
+    
+        # the beginnings of architecture 
         arch += "begin\n"
 
         # add components
         for i in self.components_list:
             arch += "\n"
             arch += i.component_to_vhdl()
+
+        # add process
+        for i in self.process_list:
+            arch += i.process_to_vhdl()
         
+        # the end of architecture
         arch += f"end {self.name}_arch;\n" 
 
         code = lib
