@@ -18,3 +18,4 @@ class Registre:
         self.In.__init__(f"{self.name}_in", "unsigned("f"{self.bits - 1} downto 0)", "in")
         self.Out.__init__(f"{self.name}_out", "unsigned("f"{self.bits - 1} downto 0)", "out")
 
+    
