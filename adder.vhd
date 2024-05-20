@@ -4,7 +4,7 @@ use ieee.NUMERIC_STD.all;
   
 entity adder is
    port(
-          clk : in std_logic;
+          clock : in std_logic;
           a : in unsigned(7 downto 0);
           b : in unsigned(7 downto 0);
           res : out unsigned(8 downto 0)

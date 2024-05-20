@@ -11,7 +11,8 @@ res = Signal("res", "unsigned(8 downto 0)", "out")
 
 res_int = Signal("res_int", "unsigned(7 downto 0)", "in")
 
-clock = Clock("clk", 10, "ns")
+clock = Clock("clock", 10, "ns")
+clock_tb = Clock("clock_tb", 10, "ns")
 
 port = Port([clock, s1, s2, s3, res])
 
@@ -36,9 +37,18 @@ m.add_component(first_adder)
 m.add_component(second_adder)
 
 #---------------------------------------------------------------------------
-clk_process = Clock_Process("clock_process", clock)
+clk_process = Clock_Simulation("clock_process", clock)
 m.add_process(clk_process)
+
+clk_process2 = Clock_Simulation("clock_process", clock_tb)
+m.add_process(clk_process2)
+
+p = Process("p1", [clock, s1, s2], "wait;")
+m.add_process(p)
 
 # create vhdl file (Model.vhd)
 m.model_to_vhdl()
 
+""" print("**************************")
+for i in m.signals_list:
+    print(i.name) """

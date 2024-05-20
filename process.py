@@ -6,17 +6,35 @@ class Process:
     sensibilities : List[Signal]
     code : str
 
-    def __init__(self, label : str, sensibilities : List[Signal], code : str = None) -> None:
+    def __init__(self, label : str, sensibilities : List[Signal] = None, code : str = None) -> None:
         self.label = label
         self.sensibilities = sensibilities
         self.code = code
 
-        def process_to_vhdl(self):
-            pass
+    def process_to_vhdl(self) -> str:
+        seq = f"    -- {self.label} process\n"
+        if self.sensibilities == None:
+            seq += f"   {self.label} : process\n"
+        else:
+            seq += f"   {self.label} : process ("
+            for i in self.sensibilities:
+                if self.sensibilities[-1] == i:
+                    seq += f"{i.name})\n"
+                else:
+                    seq += f"{i.name},"
+        seq += "   begin\n"
+        seq += f"       {self.code}\n"
+        seq += f"   end process;\n"
+        return seq
 
 
+class Simulation(Process):
 
-class Clock_Process(Process):
+    def __init__(self, label: str, sensibilities: List[Signal] = None, code: str = None) -> None:
+        super().__init__(label, sensibilities, code)
+
+
+class Clock_Simulation(Simulation):
     
     def __init__(self, label : str, clock : Clock) -> None:
         self.label = label
@@ -24,7 +42,8 @@ class Clock_Process(Process):
         self.sensibilities = None
     
     def process_to_vhdl(self) -> str:
-        self.code = f"   {self.label} : process\n"
+        self.code = "   -- clock simulation\n"
+        self.code += f"   {self.label} : process\n"
         self.code += "   begin\n"
         self.code += f"      {self.clock.name} <= '0';\n"
         self.code += f"      wait for {self.clock.period} {self.clock.unit};\n"
