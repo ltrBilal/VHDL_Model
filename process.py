@@ -28,13 +28,7 @@ class Process:
         return seq
 
 
-class Simulation(Process):
-
-    def __init__(self, label: str, sensibilities: List[Signal] = None, code: str = None) -> None:
-        super().__init__(label, sensibilities, code)
-
-
-class Clock_Simulation(Simulation):
+class Clock_Process(Process):
     
     def __init__(self, label : str, clock : Clock) -> None:
         self.label = label

@@ -46,7 +46,14 @@ class Model:
             if process in self.process_list:
                 raise ValueError(f"ERROR: process {process.label} already exist")
             else:
-                self.process_list.append(process)
+                if type(process) == Clock_Process:
+                    for j in self.ports.signals_list:
+                        if process.clock.name == j.name:
+                            raise ValueError(f"ERROR : this clock \"{process.clock.name}\" can't be used for simulation (it is a port)")
+            for i in self.process_list:
+                if process.label == i.label:
+                    raise ValueError(f"ERROR : the label {process.label} already exist")
+            self.process_list.append(process)
         except ValueError as e:
             print(e)
             
@@ -90,14 +97,7 @@ class Model:
 
         # add process
         for i in self.process_list:
-            try:
-                if type(i) == Clock_Simulation:
-                    for j in self.ports.signals_list:
-                        if i.clock.name == j.name:
-                            raise ValueError(f"ERROR : this clock \"{i.clock.name}\" can't be used for simulation (it is a port)")
-                arch += f"{i.process_to_vhdl()}\n"
-            except ValueError as e:
-                print(e)
+            arch += f"{i.process_to_vhdl()}\n"
         
         # the end of architecture
         arch += f"end {self.name}_arch;\n" 
@@ -122,7 +122,7 @@ class Model:
                     self.add_signal(j)
         # necessary signals for process
         for i in self.process_list:
-            if type(i) == Clock_Simulation and i.clock not in self.ports.signals_list:
+            if type(i) == Clock_Process and i.clock not in self.ports.signals_list:
                 self.add_signal(i.clock)
             elif i.sensibilities != None:
                 for j in i.sensibilities:

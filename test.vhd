@@ -34,6 +34,14 @@ begin
        b => res_int,
        res => res
     );
+
+-- instantiate an registre
+   reg1: entity work.registre(registre_arch)
+    port map(
+       clock => clock,
+       a => a,
+       res => res
+    );
    -- clock simulation
    clock_process : process
    begin
