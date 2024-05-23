@@ -16,6 +16,7 @@ class Adder(Component):
         self.output = output_signal
         self.clock = clock
         self.racine = "adder"
+        self.path = f"./VHDL_files/{self.racine}.vhd"
 
         # list of signals
         self.signals_list : List[Signal] = []
@@ -51,7 +52,7 @@ class Adder(Component):
         code += entity
         code += arch
 
-        file1 = open(f'./{self.racine}.vhd', 'w')
+        file1 = open(f'{self.path}', 'w')
         file1.write(code)
         
     # -------------------------------------------------------------------

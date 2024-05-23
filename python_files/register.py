@@ -13,6 +13,7 @@ class Registre(Component):
         self.input = input
         self.output = output
         self.racine = "registre"
+        self.path = f"./VHDL_files/{self.racine}.vhd"
 
         self.signals_list : List[Signal] = []
         self.signals_list.extend([clock, input, output])
@@ -30,7 +31,7 @@ class Registre(Component):
         entity += f"end {self.racine};\n"
 
         # architecture
-        arch = f"\narchitecture {self.racine}_arch of adder is\n"
+        arch = f"\narchitecture {self.racine}_arch of {self.racine} is\n"
         arch += "begin\n"
         arch += f"      {self.output.name} <= {self.input.name};\n"
         arch += f"end {self.racine}_arch;"
@@ -39,7 +40,7 @@ class Registre(Component):
         code += entity
         code += arch
 
-        file1 = open(f'./{self.racine}.vhd', 'w')
+        file1 = open(f'{self.path}', 'w')
         file1.write(code)
 
     # -------------------------------------------------------------------

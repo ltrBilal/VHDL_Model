@@ -10,7 +10,7 @@ entity registre is
    );
 end registre;
 
-architecture registre_arch of adder is
+architecture registre_arch of registre is
 begin
       res <= a;
 end registre_arch;

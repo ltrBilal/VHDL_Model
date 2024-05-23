@@ -16,6 +16,7 @@ class Model:
         self.name = name
         self.lib = Library.__new__(Library)
         self.ports = None
+        self.path = f"./VHDL_files/{self.name}.vhd"
 
     # -------------------------------------------------------------------
 
@@ -106,7 +107,7 @@ class Model:
         code += entity
         code += arch
 
-        file = open(f"./{self.name}.vhd", 'w')
+        file = open(f"{self.path}", 'w')
         file.write(code)
         
     # -------------------------------------------------------------------
