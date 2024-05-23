@@ -10,13 +10,12 @@ class Model:
     components_list : List[Component] = []
     signals_list : List[Signal] = []
     connections_list : List[Connector] = []
-    process_list : List[Type[Process]] = []
+    process_list : List[Process] = []
 
     def __init__(self, name : str) -> None:
         self.name = name
         self.lib = Library.__new__(Library)
         self.ports = None
-        self.process_list : List[Type[Process]] = None
 
     # -------------------------------------------------------------------
 
@@ -42,11 +41,21 @@ class Model:
             connector.component.connector = connector
             print(f"the connector for {connector.component.component_name} is added")
 
-    def add_process(self, process : Type[Process]):
-        if process in self.process_list:
-            print(f"ERROR: process {process.label} already exist")
-        else:
+    def add_process(self, process : Process):
+        try:
+            if process in self.process_list:
+                raise ValueError(f"ERROR: process {process.label} already exist")
+            else:
+                if type(process) == Clock_Process:
+                    for j in self.ports.signals_list:
+                        if process.clock.name == j.name:
+                            raise ValueError(f"ERROR : this clock \"{process.clock.name}\" can't be used for simulation (it is a port)")
+            for i in self.process_list:
+                if process.label == i.label:
+                    raise ValueError(f"ERROR : the label {process.label} already exist")
             self.process_list.append(process)
+        except ValueError as e:
+            print(e)
             
     def add_port(self, ports : Port):
         self.ports = ports
@@ -74,13 +83,10 @@ class Model:
         # add signals
         signals_list_copy = [s.copy() for s in self.signals_list] # make a copy of all signals in original list
         for i in signals_list_copy:
-            i.direction = None
-            arch += f"      {i.signal_to_vhdl()}; \n"
-        for i in self.process_list:
-            if type(i) == Clock_Process and i.clock in self.signals_list:
-                print("ERROR : this clock can't be used in clock simulation")
-                
-    
+            if i not in self.ports.signals_list:
+                i.direction = None
+                arch += f"      {i.signal_to_vhdl()}; \n"
+                    
         # the beginnings of architecture 
         arch += "begin\n"
 
@@ -91,7 +97,7 @@ class Model:
 
         # add process
         for i in self.process_list:
-            arch += i.process_to_vhdl()
+            arch += f"{i.process_to_vhdl()}\n"
         
         # the end of architecture
         arch += f"end {self.name}_arch;\n" 
@@ -106,10 +112,19 @@ class Model:
     # -------------------------------------------------------------------
     """
         this function adds signals 
-        passed in the connector if they are not in the ports session
+        passed in the connector or in a process if they are not in the ports session
     """
     def __add_necessary_signals(self):
+        # necessary signals for connectors
         for i in self.connections_list:
             for j in i.signals_list:
                 if j not in self.signals_list and j not in self.ports.signals_list:
                     self.add_signal(j)
+        # necessary signals for process
+        for i in self.process_list:
+            if type(i) == Clock_Process and i.clock not in self.ports.signals_list:
+                self.add_signal(i.clock)
+            elif i.sensibilities != None:
+                for j in i.sensibilities:
+                    if j not in self.ports.signals_list:
+                        self.add_signal(j)

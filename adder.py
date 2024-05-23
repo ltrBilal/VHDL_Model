@@ -14,6 +14,7 @@ class Adder(Component):
         self.first_In = first_input_signal
         self.second_In = second_input_signal
         self.output = output_signal
+        self.clock = clock
         self.racine = "adder"
 
         # list of signals
@@ -25,7 +26,7 @@ class Adder(Component):
     
     # -------------------------------------------------------------------
     
-    def generate_component_file(self):
+    def generate_component_file(self) -> None:
         
         if self.first_In.bits >= self.second_In.bits:
             self.output.bits = self.first_In.bits + 1

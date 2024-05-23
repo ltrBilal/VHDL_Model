@@ -35,7 +35,7 @@ class Component(ABC):
         function to generate the VHDL code file for the component
     """
     @abstractmethod
-    def generate_component_file(self):
+    def generate_component_file(self) -> None:
         pass
 
     @abstractmethod

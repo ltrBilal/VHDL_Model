@@ -2,16 +2,15 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.NUMERIC_STD.all;
   
-entity adder is
+entity registre is
    port(
           clock : in std_logic;
           a : in unsigned(7 downto 0);
-          b : in unsigned(7 downto 0);
           res : out unsigned(8 downto 0)
    );
-end adder;
+end registre;
 
-architecture adder_arch of adder is
+architecture registre_arch of adder is
 begin
-      res <= ('0' & a) + ('0' & b);
-end adder_arch;
+      res <= a;
+end registre_arch;
