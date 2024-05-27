@@ -1,7 +1,8 @@
-from a_signal import Signal
-from typing import List
 from abc import ABC, abstractmethod
 from port import Port
+from typing import List
+from a_signal import Signal, Clock
+from exception import My_Exception
 
 class Component(ABC):
 
@@ -28,11 +29,10 @@ class Component(ABC):
             map += "    );\n"
             return map
         else:
-            print(f"ERROR : Connector not initialized for {self.component_name}")
             return ""
 
     """
-        function to generate the VHDL code file for the component
+        function to generate VHDL file for the component
     """
     @abstractmethod
     def generate_component_file(self) -> None:

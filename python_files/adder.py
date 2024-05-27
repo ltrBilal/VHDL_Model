@@ -1,11 +1,11 @@
-from a_signal import *
-from library import *
-from component import *
+from component import Component
+from a_signal import Signal, Clock
 from typing import List
+from library import Library
 
 class Adder(Component):
 
-    launch = True # to write a file for this component type, just once
+    launch = True # to write VHDL file for this component type, just once
 
     def __init__(self, clock : Clock, component_name : str, first_input_signal : Signal, 
                  second_input_signal : Signal, output_signal : Signal) -> None:
@@ -28,11 +28,6 @@ class Adder(Component):
     # -------------------------------------------------------------------
     
     def generate_component_file(self) -> None:
-        
-        if self.first_In.bits >= self.second_In.bits:
-            self.output.bits = self.first_In.bits + 1
-        else:
-            self.output.bits = self.second_In.bits + 1
 
         # library
         lib = Library.__new__(Library)
@@ -43,7 +38,7 @@ class Adder(Component):
         entity += f"end {self.racine};\n"
 
         # architecture
-        arch = "\narchitecture adder_arch of adder is\n"
+        arch = f"\narchitecture {self.racine}_arch of {self.racine} is\n"
         arch += "begin\n"
         arch += f"      {self.output.name} <= ('0' & {self.first_In.name}) + ('0' & {self.second_In.name});\n"
         arch += "end adder_arch;"

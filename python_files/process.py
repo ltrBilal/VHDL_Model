@@ -1,5 +1,5 @@
 from a_signal import Signal, Clock
-from typing import List, Type
+from typing import List
 
 class Process:
     label : str

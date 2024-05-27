@@ -5,15 +5,16 @@ use ieee.NUMERIC_STD.all;
 entity test is
    port(
           clock : in std_logic;
-          a : in unsigned(7 downto 0);
-          b : in unsigned(7 downto 0);
-          c : in unsigned(7 downto 0);
-          res : out unsigned(8 downto 0)
+          a : in unsigned(15 downto 0);
+          b : in unsigned(15 downto 0);
+          c : in unsigned(16 downto 0);
+          res : out unsigned(31 downto 0)
    );
 end test;
 
 architecture test_arch of test is
-      signal res_int : unsigned(7 downto 0); 
+      signal res_int : unsigned(16 downto 0); 
+      signal res_int2 : unsigned(16 downto 0); 
       signal clock_tb : std_logic; 
 begin
 
@@ -35,12 +36,21 @@ begin
        res => res
     );
 
--- instantiate an registre
-   reg1: entity work.registre(registre_arch)
+-- instantiate an register
+   reg1: entity work.register(register_arch)
     port map(
        clock => clock,
        a => a,
        res => res
+    );
+
+-- instantiate an multiplier
+   multip: entity work.multiplier(multiplier_arch)
+    port map(
+       clock => clock,
+       a => a,
+       b => b,
+       res => res_int2
     );
    -- clock simulation
    clock_process : process

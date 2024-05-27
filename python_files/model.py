@@ -1,9 +1,10 @@
-from library import Library
+from component import Component, Connector
 from typing import List
-from component import *
-from a_signal import *
-from process import *
-from typing import Type
+from process import Process, Clock_Process
+from library import Library
+from a_signal import Signal
+from port import Port
+from exception import My_Exception
 
 class Model:
     
@@ -21,26 +22,43 @@ class Model:
     # -------------------------------------------------------------------
 
     def add_component(self, component : Component):
-        if component in self.components_list:
-            print(f"ERROR : component name \"{component.component_name}\" already exist")
-        else:
-            self.components_list.append(component)
-            print(f"the component {component.component_name} is added")
+        try:
+            if component in self.components_list:
+                raise NameError(f"ERROR : component name \"{component.component_name}\" already exist")
+            elif component.connector is None:
+                raise NameError(f"ERROR : Connector not initialized for {component.component_name}")
+            else:
+                self.components_list.append(component)
+                print(f"the component {component.component_name} is added")
+        except NameError as n:
+            My_Exception.add_exception(n)
+
+    # -------------------------------------------------------------------
 
     def add_signal(self, signal : Signal):
-        if signal in self.signals_list:
-            print(f"ERROR : signal name \"{signal.name}\" already exist")
-        else:
-            self.signals_list.append(signal)
-            print(f"the signal {signal.name} is added")
+        try:
+            if signal in self.signals_list:
+                raise NameError(f"ERROR : signal name \"{signal.name}\" already exist")
+            else:
+                self.signals_list.append(signal)
+                print(f"the signal {signal.name} is added")
+        except NameError as n:
+                My_Exception.add_exception(n)
+            
+    # -------------------------------------------------------------------
 
     def add_connector(self, connector : Connector):
-        if connector.component in self.connections_list:
-            print(f"ERROR : the component \"{connector.component.component_name}\" has already a connector")
-        else:
-            self.connections_list.append(connector)
-            connector.component.connector = connector
-            print(f"the connector for {connector.component.component_name} is added")
+        try:
+            if connector.component in self.connections_list:
+                raise NameError(f"ERROR : the component \"{connector.component.component_name}\" has already a connector")
+            else:
+                self.connections_list.append(connector)
+                connector.component.connector = connector
+                print(f"the connector for {connector.component.component_name} is added")
+        except NameError as n:
+            My_Exception.add_exception(n)
+
+    # -------------------------------------------------------------------
 
     def add_process(self, process : Process):
         try:
@@ -56,7 +74,9 @@ class Model:
                     raise ValueError(f"ERROR : the label {process.label} already exist")
             self.process_list.append(process)
         except ValueError as e:
-            print(e)
+            My_Exception.add_exception(e)
+
+    # -------------------------------------------------------------------
             
     def add_port(self, ports : Port):
         self.ports = ports
@@ -64,51 +84,59 @@ class Model:
     # -------------------------------------------------------------------
 
     def model_to_vhdl(self):
-        self.__add_necessary_signals()
-        # link components and connectors
-        for i in self.connections_list:
-            for j in self.components_list:
-                if i.component.component_name == j.component_name:
-                    j.connector = i
-                    break
-        # add libraries
-        lib = self.lib.library_vhdl()
-        # entity
-        entity = f"\nentity {self.name} is\n"
-        if self.ports != None:
-            entity += self.ports.port_to_vhdl()
-        entity += f"end {self.name};\n\n"
-        # architecture
-        arch = f"architecture {self.name}_arch of {self.name} is\n"
+        if My_Exception.warnings_list.__len__() > 0:
+                My_Exception.display_warnings()  # display all warnings
+                
+        if My_Exception.exceptions_list == []:
+            self.__add_necessary_signals()
+            # link components and connectors
+            for i in self.connections_list:
+                for j in self.components_list:
+                    if i.component.component_name == j.component_name:
+                        j.connector = i
+                        break
+            # add libraries
+            lib = self.lib.library_vhdl()
+            # entity
+            entity = f"\nentity {self.name} is\n"
+            if self.ports != None:
+                entity += self.ports.port_to_vhdl()
+            entity += f"end {self.name};\n\n"
+            # architecture
+            arch = f"architecture {self.name}_arch of {self.name} is\n"
 
-        # add signals
-        signals_list_copy = [s.copy() for s in self.signals_list] # make a copy of all signals in original list
-        for i in signals_list_copy:
-            if i not in self.ports.signals_list:
-                i.direction = None
-                arch += f"      {i.signal_to_vhdl()}; \n"
-                    
-        # the beginnings of architecture 
-        arch += "begin\n"
+            # add signals
+            signals_list_copy = [s.copy() for s in self.signals_list] # make a copy of all signals in original list
+            for i in signals_list_copy:
+                if i not in self.ports.signals_list:
+                    i.direction = None
+                    arch += f"      {i.signal_to_vhdl()}; \n"
+                        
+            # the beginnings of architecture 
+            arch += "begin\n"
 
-        # add components
-        for i in self.components_list:
-            arch += "\n"
-            arch += i.component_to_vhdl()
+            # add components
+            for i in self.components_list:
+                arch += "\n"
+                arch += i.component_to_vhdl()
 
-        # add process
-        for i in self.process_list:
-            arch += f"{i.process_to_vhdl()}\n"
-        
-        # the end of architecture
-        arch += f"end {self.name}_arch;\n" 
+            # add process
+            for i in self.process_list:
+                arch += f"{i.process_to_vhdl()}\n"
+            
+            # the end of architecture
+            arch += f"end {self.name}_arch;\n" 
 
-        code = lib
-        code += entity
-        code += arch
+            code = lib
+            code += entity
+            code += arch
 
-        file = open(f"{self.path}", 'w')
-        file.write(code)
+            file = open(f"{self.path}", 'w')
+            file.write(code)
+            
+        else:
+            My_Exception.display_exceptions()
+            print(" *** VHDL files have not been modified or created")
         
     # -------------------------------------------------------------------
     """

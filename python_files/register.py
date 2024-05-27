@@ -12,7 +12,7 @@ class Registre(Component):
         self.clock = clock
         self.input = input
         self.output = output
-        self.racine = "registre"
+        self.racine = "register"
         self.path = f"./VHDL_files/{self.racine}.vhd"
 
         self.signals_list : List[Signal] = []
